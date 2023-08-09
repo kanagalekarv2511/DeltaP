@@ -1,27 +1,44 @@
-#!/bin/bash
-        export PATH=$PATH:/usr/sbin:/usr/bin
+#!/bin/sh
+        PATH=$PATH:$HOME/scripts
         #Create Directories and files for studetnts
-        echo -e  " Creating accounts based on /root/inputfiles/fresherDetails.txt file \n"
-        awk '{print$1":"$2}' /root/inputfiles/fresherDetails.txt > /root/inputfiles/cleanfresherDetails.txt
-        for student in $(cat /root/inputfiles/cleanstudentDetails.txt)
+        rm -r $HOME/Tax
+        rm -r $HOME/Taxpending
+        mkdir $HOME/Tax
+        mkdir $HOME/Taxpending 
+        echo " Creating Household member file based on $HOME/Inputfiles/City_tax_Records.txt \n"
+        awk '{print$1":"$2":"$3":"$4":"$5":"$6":"}' $HOME/Inputfiles/City_tax_Records.txt > $HOME/Inputfiles/Clean_City_tax_Records.txt
+        for member in $(cat $HOME/Inputfiles/Clean_City_tax_Records.txt)
         do
-                Name="$(echo -e  $student | awk -F:  '{print $1}')"
-                AppNumber="$(echo -e  $student | awk -F:  '{print $2}')"
-                Password="$(echo -e  $Name$AppNumber)"
-                echo $Password
-#       # Check if student is already exist in System
-                grep $RollNumber /etc/passwd
-                        if [ $? -eq 0 ]
-                        then
-                           echo -e  " \n User $Name is already in system"
-                        else
-                           echo -e  "\n Creating user $Name"
-                           mkdir /home/$Name 2>/dev/null
-                           useradd -u $AppNumber -m -d /home/$Name -s /bin/bash  $Name 2>/dev/null
-                           echo $Password | passwd $NAME
-                           chown  "$Name":"$Name" /home/$Name 2>/dev/null
-                           cp /root/scripts/studentscripts/* /home/$Name
-                           cp /root/scripts/studentscripts/.bashrc /home/$Hostel/$Room/$Name
-                           chown  "$Name":"$Name" /home/$Name/* 2>/dev/null
-                       fi
+        #       echo $member
+        #       sleep 2
+        Name="$(echo $member | awk -F:  '{print $1}')"
+        HouseNumber="$(echo $member | awk -F:  '{print $2}')"
+        District="$(echo $member | awk -F:  '{print $3}')"
+        City="$(echo $member | awk -F:  '{print $4}')"
+        Income="$(echo $member | awk -F:  '{print $5}')"
+        Taxpaidstatus="$(echo $member | awk -F:  '{print $6}')"
+        echo "$Name:$Income:$Taxpaidstatus">>$HOME/Tax/$HouseNumber"_"$District"_"$City
         done
+        for House in $(ls $HOME/Tax/*)
+        do
+                echo " I am in $House"
+                Taxpending=0
+                for member in $(cat $House)
+                do
+                Name="$(echo $member | awk -F:  '{print $1}')"
+                Income="$(echo $member | awk -F:  '{print $2}')"
+                Taxpaidstatus="$(echo $member | awk -F:  '{print $3}')"
+                echo " I am in $member"
+                if [ "$Taxpaidstatus" = "No" ];
+                then
+                Taxformember="$(echo $Income*0.2|bc)"
+                echo $Taxformember
+                echo $Taxpending
+                Taxpending=$(echo "$Taxformember + $Taxpending" |bc )
+                echo $Taxpending
+                fi
+                done
+                FileName="$(echo $House | awk -F/  '{print $5}')"
+                echo "House Address is : $FileName" > $HOME/Taxpending/$FileName"_Taxdue"
+                echo " TaxPending is : $Taxpending" >> $HOME/Taxpending/$FileName"_Taxdue"
+        done 
