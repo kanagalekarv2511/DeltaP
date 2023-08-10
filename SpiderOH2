@@ -1,0 +1,61 @@
+ser www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
+
+events {
+        worker_connections 768;
+        # multi_accept on;
+}
+
+http {
+
+        ##
+        # Basic Settings
+        ##
+
+        sendfile on;
+        tcp_nopush on;
+        types_hash_max_size 2048;
+        # server_tokens off;
+        upstream Mess1 {
+         server example1.com:80 weight=3;
+         server example2.com:80 weight=6;
+        }
+
+        # This server accepts all traffic to port 80 and passes it to the upstream.
+        # Notice that the upstream name and the proxy_pass need to match.
+
+    server {
+            listen 80;
+    server_name  localhost;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Real-IP  $remote_addr;
+
+
+
+
+apt-get install nginx-full
+
+https://www.learnbestcoding.com/post/15/hosting-multiple-websites-with-nginx
+
+Go to the Nginx root folder and locate nginx.conf file. Ensure the conf file has the below entry.
+
+oot@vaibhav-Inspiron-3558:/etc/nginx/sites-enabled# ls -al
+total 8
+drwxr-xr-x 2 root root 4096 Aug 10 21:17 .
+drwxr-xr-x 8 root root 4096 Aug 10 21:22 ..
+lrwxrwxrwx 1 root root   34 Aug 10 21:17 default -> /etc/nginx/sites-available/default
+root@vaibhav-Inspiron-3558:/etc/nginx/sites-enabled# rm default
+root@vaibhav-Inspiron-3558:/etc/nginx/sites-enabled# ls -al
+total 8
+drwxr-xr-x 2 root root 4096 Aug 10 21:44 .
+drwxr-xr-x 8 root root 4096 Aug 10 21:22 ..
+root@vaibhav-Inspiron-3558:/etc/nginx/sites-enabled# systemctl start nginx
+
+
+root@vaibhav-Inspiron-3558:/var/www/example1.com# cat *
+<h1>Hello World .... This is example1</h1> 
+
+Web site 1.
